@@ -1,0 +1,98 @@
+<--
+1.edit the pom.xml
+        shiro and slf4j
+-->
+<dependencies>
+<dependency>
+    <groupId>org.apache.shiro</groupId>
+    <artifactId>shiro-core</artifactId>
+    <version>1.2.4</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>1.7.12</version> 
+</dependency>
+</dependencies>
+2.resources create shiro.ini (replace the db ,from shiro.ini get username and password  )and log4j.properties (if not this file would get some errors)
+
+ 2.1 shiro.ini
+        [users]
+        java=123456
+ 2.2 log4j.properties
+
+        log4j.rootLogger=INFO,stdout,info,warn,error
+
+        #\u63a7\u5236\u53f0\u8f93\u51fa
+        log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+        log4j.appender.stdout.Target=System.out
+        log4j.appender.stdout.Threshold=INFO
+        log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+        log4j.appender.stdout.layout.ConversionPattern=[%p][%d{yyyy-MM-dd HH:mm:ss}] %l %m %n
+
+        #INFO\u65e5\u5fd7
+        log4j.logger.info=info
+        log4j.appender.info=org.apache.log4j.DailyRollingFileAppender
+        log4j.appender.info.File = ${catalina.base}/logs/framework/info.log
+        log4j.appender.info.datePattern='.'yyyy-MM-dd
+        log4j.appender.info.append=true
+        log4j.appender.info.Threshold=INFO
+        log4j.appender.info.layout=org.apache.log4j.PatternLayout
+        log4j.appender.info.layout.ConversionPattern=[%p][%d{yyyy-MM-dd HH:mm:ss}] %l %m %n
+
+        #WARN\u65e5\u5fd7
+        log4j.appender.warn=org.apache.log4j.DailyRollingFileAppender
+        log4j.appender.warn.File = ${catalina.base}/logs/framework/warn.log
+        log4j.appender.warn.datePattern='.'yyyy-MM-dd
+        log4j.appender.warn.append=true
+        log4j.appender.warn.Threshold=WARN
+        log4j.appender.warn.layout=org.apache.log4j.PatternLayout
+        log4j.appender.warn.layout.ConversionPattern=[%p][%d{yyyy-MM-dd HH:mm:ss}] %l %m %n
+
+        #ERROR\u65e5\u5fd7
+        log4j.appender.error=org.apache.log4j.DailyRollingFileAppender
+        log4j.appender.error.File = ${catalina.base}/logs/framework/error.log
+        log4j.appender.error.datePattern='.'yyyy-MM-dd
+        log4j.appender.error.append=true
+        log4j.appender.error.Threshold=ERROR
+        log4j.appender.error.layout=org.apache.log4j.PatternLayout
+        log4j.appender.error.layout.ConversionPattern=[%p][%d{yyyy-MM-dd HH:mm:ss}] %l %m %n
+
+        #\u6267\u884c\u6162\u7684SQL
+        log4j.logger.com.alibaba.druid.filter.stat.StatFilter=ERROR,slowsql
+        log4j.appender.slowsql=org.apache.log4j.DailyRollingFileAppender
+        log4j.appender.slowsql.File = ${catalina.base}/logs/framework/slow_sql.log
+        log4j.appender.slowsql.datePattern='.'yyyy-MM-dd
+        log4j.appender.slowsql.append=true
+        log4j.appender.slowsql.layout=org.apache.log4j.PatternLayout
+        log4j.appender.slowsql.layout.ConversionPattern=[%d{yyyy-MM-dd HH:mm:ss}] %m %n
+
+        #\u63a7\u5236\u53f0\u8f93\u51fa\u6240\u6709SQL
+        log4j.logger.com.framework.dao=DEBUG,sql
+        log4j.appender.sql=org.apache.log4j.ConsoleAppender
+        log4j.appender.sql.Target=System.out
+        log4j.appender.sql.layout=org.apache.log4j.PatternLayout
+        log4j.appender.sql.layout.ConversionPattern=%m %n
+
+3.HelloWorld.java
+
+public static void main(String[] args) {
+		//读取配置文件 初始化SecurityManager 工厂
+		Factory<SecurityManager> factory =new IniSecurityManagerFactory("classpath:shiro.ini");
+		//获取securitymanager 实例
+		SecurityManager securityManager =factory.getInstance();
+		//绑定securityManager到SecurityUtils
+		SecurityUtils.setSecurityManager(securityManager);
+		//得到当前用户
+		Subject currentUser =SecurityUtils.getSubject();
+		//创建token令牌  用户名/密码
+		UsernamePasswordToken token =new UsernamePasswordToken("java","123456");
+		//身份认证
+		try {
+			currentUser.login(token);
+			System.out.println("successful！");
+		} catch (Exception e) {
+			System.out.println("fail!");
+		}		
+	}
+        
